@@ -107,3 +107,35 @@ export async function fetchCategoryCounts() {
     throw err;
   }
 }
+
+export async function getLatestDonors(){
+  try{
+    console.log("Attempting to fetch data for latest donors...");
+
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID,
+      range: "Copy of Records!A:Z",
+    });
+    console.log("Successfully fetched data for latest donors");
+
+    const rows = response.data.values || [];
+      const headers = rows.shift();
+
+  const nameIdx = headers.indexOf("Full Name");
+  const statusIdx = headers.indexOf("Donated");
+  const timeIdx = headers.indexOf("Timestamp");
+
+  const donors = rows
+    .filter(r => r[statusIdx] === "Donated")
+    .sort((a, b) => new Date(b[timeIdx]) - new Date(a[timeIdx]))
+    .slice(0, 5)
+    .map(r => r[nameIdx]);
+    console.log("Latest donors:", donors);
+    return donors;
+
+  }catch(err){
+    console.error("Error fetching latest donors:", err.message);
+    console.error("Full error:", err);
+    throw err;
+  }
+}
