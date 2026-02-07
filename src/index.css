@@ -3,3 +3,54 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Toast notification animations - Phone-like slide in */
+@keyframes toast-enter {
+  0% {
+    transform: translateX(100%) scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes toast-leave {
+  0% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%) scale(0.9);
+    opacity: 0;
+  }
+}
+
+.animate-enter {
+  animation: toast-enter 0.4s cubic-bezier(0.21, 1.02, 0.73, 1) forwards;
+}
+
+.animate-leave {
+  animation: toast-leave 0.3s cubic-bezier(0.06, 0.71, 0.55, 1) forwards;
+}
+
+/* Pulse animation for notification dot */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-pulse {
+  animation: pulse-ring 1.5s ease-in-out infinite;
+}

@@ -1,4 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { showDonationNotification } from "./DonationNotification";
+
+// API base URL - change this to match your backend
+const API_BASE = 'https://djsnss-bdd25.onrender.com';
 
 // Department data with fallback scores and additional info.
 const departmentData = [
@@ -81,21 +85,70 @@ export function BloodDonationLeaderboard() {
     departmentData.map(() => 0)
   );
   const [targetScores, setTargetScores] = useState(departmentData.map(() => 0));
+  const previousScoresRef = useRef(null);
+  const seenDonorsRef = useRef(new Set());
+  const isFirstFetch = useRef(true);
 
   useEffect(() => {
-    const fetchData = () => {
-      fetch('https://djsnss-bdd25.onrender.com/bdd25/counts')
-        .then(res => res.json())
-        .then(data => {
-          const newScores = departmentData.map(
-            dept => data[dept.name] ?? 0
-          );
-          setTargetScores(newScores);
-        })
-        .catch(error => {
-          console.error('Error fetching leaderboard stats:', error);
-        });
-    }
+    const fetchData = async () => {
+      try {
+        // Fetch counts
+        const countsRes = await fetch(`${API_BASE}/bdd25/counts`);
+        const countsData = await countsRes.json();
+        
+        const newScores = departmentData.map(
+          dept => countsData[dept.name] ?? 0
+        );
+        
+        // Fetch latest donors for notifications (only after first fetch)
+        if (!isFirstFetch.current) {
+          try {
+            const donorsRes = await fetch(`${API_BASE}/bdd25/latest`);
+            const donorsData = await donorsRes.json();
+            
+            // Show notification for each new donor
+            // Expected format: [{ name: "John", department: "COMPS", bloodGroup: "O+", _id: "..." }, ...]
+            if (Array.isArray(donorsData)) {
+              donorsData.forEach(donor => {
+                const donorId = donor._id || donor.id || `${donor.name}-${donor.department}-${donor.timestamp}`;
+                
+                if (!seenDonorsRef.current.has(donorId)) {
+                  seenDonorsRef.current.add(donorId);
+                  showDonationNotification(
+                    donor.name || 'Anonymous',
+                    donor.department || 'Unknown',
+                    donor.bloodGroup || null
+                  );
+                }
+              });
+            }
+          } catch (error) {
+            console.error('Error fetching latest donors:', error);
+          }
+        } else {
+          // On first fetch, just populate the seen donors set
+          try {
+            const donorsRes = await fetch(`${API_BASE}/bdd25/latest`);
+            const donorsData = await donorsRes.json();
+            
+            if (Array.isArray(donorsData)) {
+              donorsData.forEach(donor => {
+                const donorId = donor._id || donor.id || `${donor.name}-${donor.department}-${donor.timestamp}`;
+                seenDonorsRef.current.add(donorId);
+              });
+            }
+          } catch (error) {
+            console.error('Error fetching initial donors:', error);
+          }
+        }
+        
+        isFirstFetch.current = false;
+        previousScoresRef.current = [...newScores];
+        setTargetScores(newScores);
+      } catch (error) {
+        console.error('Error fetching leaderboard stats:', error);
+      }
+    };
 
     // Initial fetch.
     fetchData()
