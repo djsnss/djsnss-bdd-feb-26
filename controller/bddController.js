@@ -49,7 +49,7 @@ const sheets = google.sheets({ version: "v4", auth });
 
 // Spreadsheet details
 const SPREADSHEET_ID = process.env.SPREADSHEET_ID;
-const range = "Form responses 1!A:Z";
+const range = "Form responses 1!H:H";
 
 console.log("Spreadsheet ID:", SPREADSHEET_ID);
 console.log("Range:", range);
