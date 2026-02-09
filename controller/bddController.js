@@ -120,9 +120,12 @@ export async function getLatestDonors(){
 
     const rows = response.data.values || [];
       const headers = rows.shift();
+    console.log("Headers found:", headers);
+    console.log(rows.length, "data rows found");
+    console.log(rows.slice(0, 5)); // Log first 5 rows for debugging
 
   const nameIdx = headers.indexOf("Full Name");
-  const statusIdx = headers.indexOf("Donated");
+  const statusIdx = headers.indexOf("Donated ");
   const timeIdx = headers.indexOf("Timestamp");
 
   const donors = rows
