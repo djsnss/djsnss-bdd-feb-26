@@ -4,7 +4,7 @@ import { showDonationNotification } from "./DonationNotification";
 // API base URL - change this to match your backend
 const API_BASE = 'https://djsnss-bdd25.onrender.com';
 
-// Department data with fallback scores and additional info.
+// Department data with fallback scores and additional info - Army Theme
 const departmentData = [
   {
     id: "aids",
@@ -12,7 +12,7 @@ const departmentData = [
     score: 0,
     image: "/assets/Mercury-removebg-preview.png",
     rocket: "/assets/rocket.png",
-    color: "linear-gradient(270deg, #F3AD5C 70%, #F6F1AE 100%)"
+    color: "linear-gradient(270deg, #8B7355 70%, #D4A574 100%)"
   },
   {
     id: "aiml",
@@ -20,7 +20,7 @@ const departmentData = [
     score: 0,
     image: "/assets/Venus-removebg-preview.png",
     rocket: "/assets/rocket.png",
-    color: "linear-gradient(270deg, #78470F 70%, #EEDACC 100%)"
+    color: "linear-gradient(270deg, #5C4033 70%, #C4A484 100%)"
   },
   {
     id: "comps",
@@ -28,7 +28,7 @@ const departmentData = [
     score: 0,
     image: "/assets/Earth-removebg-preview.png",
     rocket: "/assets/rocket.png",
-    color: "linear-gradient(270deg, #4AABDF 70%, #CEF2FF 100%)"
+    color: "linear-gradient(270deg, #4A5D23 70%, #8FBC8F 100%)"
   },
   {
     id: "cseds",
@@ -36,7 +36,7 @@ const departmentData = [
     score: 0,
     image: "/assets/Mars-removebg-preview.png",
     rocket: "/assets/rocket.png",
-    color: "linear-gradient(270deg, #FB1F07 70%, #FFE2DD 100%)"
+    color: "linear-gradient(270deg, #8B4513 70%, #DEB887 100%)"
   },
   {
     id: "extc",
@@ -44,7 +44,7 @@ const departmentData = [
     score: 0,
     image: "/assets/Jupiter-removebg-preview.png",
     rocket: "/assets/rocket.png",
-    color: "linear-gradient(270deg, #6C5330 70%, #F8C462 100%)"
+    color: "linear-gradient(270deg, #6B4423 70%, #D2691E 100%)"
   },
   {
     id: "icb",
@@ -52,7 +52,7 @@ const departmentData = [
     score: 0,
     image: "/assets/Saturn-removebg-preview.png",
     rocket: "/assets/rocket.png",
-    color: "linear-gradient(270deg, #010101 0%, #F5A511 100%)"
+    color: "linear-gradient(270deg, #3D3D3D 0%, #F5A511 100%)"
   },
   {
     id: "it",
@@ -60,7 +60,7 @@ const departmentData = [
     score: 90,
     image: "/assets/Uranus-removebg-preview.png",
     rocket: "/assets/rocket.png",
-    color: "linear-gradient(270deg, #0675E4 70%, #CAEDF9 100%)"
+    color: "linear-gradient(270deg, #556B2F 70%, #9ACD32 100%)"
   },
   {
     id: "mech",
@@ -68,7 +68,7 @@ const departmentData = [
     score: 0,
     image: "/assets/Neptune-removebg-preview.png",
     rocket: "/assets/rocket.png",
-    color: "linear-gradient(270deg, #0239FF 70%, #C5CAFA 100%)"
+    color: "linear-gradient(270deg, #2F4F4F 70%, #708090 100%)"
   },
   // {
   //   id: "outsider",
@@ -188,24 +188,24 @@ export function BloodDonationLeaderboard() {
     <div
       className="w-full rounded-3xl p-6 relative bg-transparent"
     >
-      {/* Title */}
+      {/* Title - Army Theme */}
       <div className="flex justify-center items-center gap-4 mb-6">
          <img
           src="/assets/DJSNSSLogo.png"
           alt=""
           width={90}
           height={90}
-          className="absolute left-6 top-4 p-2 bg-white rounded-full"
+          className="absolute left-6 top-4 p-2 bg-[#2D231A] rounded-full border-2 border-[#F3AD5C]"
           style={{ transform: "scaleX(1)" }}
         />
         <div className="text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-[#1768AA] tracking-wider drop-shadow-[0_2px_2px_rgba(0,0,0,0.4)]"
+          <h1 className="text-4xl md:text-5xl font-bold text-[#F3AD5C] tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]"
           style={{ fontFamily: "'Raleway', sans-serif" }}
           >
           
             BLOOD DONATION DRIVE🩸
           </h1>
-          <h2 className="text-2xl md:text-3xl font-bold text-[#1768AA] tracking-wide mt-1 italic"
+          <h2 className="text-2xl md:text-3xl font-bold text-[#E8D5B7] tracking-wide mt-1 italic"
           style={{ fontFamily: "'Raleway', sans-serif" }}
           >
             LEADERBOARD
@@ -225,7 +225,7 @@ export function BloodDonationLeaderboard() {
             <div key={dept.id} className="flex items-center gap-4">
               {/* Department name */}
               <div className="w-24 text-center">
-                <span className="italic font-semibold text-2xl text-[#1768AA] drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)]"
+                <span className="italic font-semibold text-2xl text-[#F3AD5C] drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]"
                 style={{ fontFamily: "'Roboto', sans-serif" }}
                 >
                   {dept.name}
@@ -234,7 +234,7 @@ export function BloodDonationLeaderboard() {
 
               {/* Progress bar container */}
               <div
-                className="relative flex-1 h-12 rounded-full shadow-inner overflow-visible bg-white"
+                className="relative flex-1 h-12 rounded-full shadow-inner overflow-visible bg-[#3D2E1F] border border-[#5A4A35]"
               >
                 <div className="overflow-hidden h-full rounded-full">
                   <div
@@ -276,7 +276,7 @@ export function BloodDonationLeaderboard() {
                     scale: "1.2",
                   }}
                 />
-                <span className="font-bold text-2xl md:text-3xl text-white bg-[#1768AA] px-2 md:px-3 py-1 rounded-full"
+                <span className="font-bold text-2xl md:text-3xl text-[#2D231A] bg-[#F3AD5C] px-2 md:px-3 py-1 rounded-full border-2 border-[#D4922E]"
                 style={{ fontFamily: "'Saira', sans-serif" }}
                 >
                   {animatedScores[index]}
