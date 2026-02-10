@@ -21,8 +21,8 @@ const FighterJetAnimation = () => {
         this.y = y;
         this.radius = 10;
         this.maxRadius = 150;
-        this.opacity = 0.6;
-        this.speed = 8;
+        this.opacity = 0.75;
+        this.speed = 7;
       }
 
       update() {
@@ -32,18 +32,33 @@ const FighterJetAnimation = () => {
 
       draw(ctx) {
         if (this.opacity <= 0) return;
+        
+        // Add subtle glow effect
+        ctx.shadowColor = 'rgba(255, 255, 255, 0.5)';
+        ctx.shadowBlur = 8;
+        
+        // Outer ring
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(255, 255, 255, ${this.opacity * 0.3})`;
-        ctx.lineWidth = 3;
+        ctx.strokeStyle = `rgba(255, 255, 255, ${this.opacity * 0.45})`;
+        ctx.lineWidth = 3.5;
+        ctx.stroke();
+        
+        // Middle ring
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius * 0.8, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(230, 240, 255, ${this.opacity * 0.3})`;
+        ctx.lineWidth = 2;
         ctx.stroke();
         
         // Inner ring
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius * 0.7, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(200, 180, 150, ${this.opacity * 0.2})`;
-        ctx.lineWidth = 2;
+        ctx.arc(this.x, this.y, this.radius * 0.6, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(200, 220, 255, ${this.opacity * 0.2})`;
+        ctx.lineWidth = 1.5;
         ctx.stroke();
+        
+        ctx.shadowBlur = 0;
       }
 
       isAlive() {
@@ -181,8 +196,8 @@ const FighterJetAnimation = () => {
           ));
         }
 
-        // Occasional shockwave
-        if (timestamp - this.lastShockwave > 2000 && Math.random() < 0.01) {
+        // Occasional shockwave - more frequent and visible
+        if (timestamp - this.lastShockwave > 1500 && Math.random() < 0.025) {
           shockwaves.push(new Shockwave(this.x, this.y));
           this.lastShockwave = timestamp;
         }
