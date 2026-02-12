@@ -1,21 +1,33 @@
 import React from "react";
 
-const Tube = ({ percentage = 40, color = "#dc2626", label = "COMPS" }) => {
+const Tube = ({ count = 0, color = "#dc2626", label = "COMPS" }) => {
+  const percentage = Math.min(count * 8, 100);
+
   return (
     <div className="flex flex-col items-center">
       <div
-        className="relative w-[55px] h-[260px] border-[3px] border-[#272822] bg-[#272822] rounded-b-[50rem] overflow-hidden"
-          style={{
+        className="relative w-[55px] h-[260px] rounded-b-[50rem] overflow-hidden"
+        style={{
           "--tube-percentage": `${percentage}%`,
           "--tube-color": color,
-          "--tube-title": `"${percentage}%"`,
+          background: "rgba(255,255,255,0.12)",
+          border: "2px solid rgba(255,255,255,0.25)",
+          backdropFilter: "blur(8px)",
+          boxShadow: "inset 0 2px 10px rgba(0,0,0,0.15), 0 4px 20px rgba(0,0,0,0.1)",
         }}
       >
         {/* Top cap */}
-        <div className="absolute -top-[3px] left-[-10px] w-[calc(100%+20px)] h-[8px] bg-[#272822] rounded-full" />
+        <div
+          className="absolute -top-[2px] left-[-8px] w-[calc(100%+16px)] h-[8px] rounded-full"
+          style={{
+            background: "rgba(255,255,255,0.3)",
+            border: "1px solid rgba(255,255,255,0.2)",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+          }}
+        />
 
-        {/* Shine */}
-        <div className="absolute left-[10%] top-0 w-[10%] h-full opacity-20 z-50">
+        {/* Glass shine */}
+        <div className="absolute left-[10%] top-0 w-[10%] h-full opacity-30 z-50">
           <div className="absolute top-[10%] w-full h-[40%] bg-white rounded-full" />
           <div className="absolute top-[60%] w-full h-[15%] bg-white rounded-full" />
         </div>
@@ -23,7 +35,7 @@ const Tube = ({ percentage = 40, color = "#dc2626", label = "COMPS" }) => {
         {/* Liquid Container */}
         <div className="absolute bottom-0 w-full h-full overflow-hidden">
           <div
-            className="absolute bottom-0 w-full transition-all duration-1000"
+            className="absolute bottom-0 w-full transition-all duration-1000 ease-out"
             style={{ height: "var(--tube-percentage)" }}
           >
             {/* Liquid Waves */}
@@ -60,24 +72,41 @@ const Tube = ({ percentage = 40, color = "#dc2626", label = "COMPS" }) => {
           ))}
         </div>
 
-        {/* Percentage Label Bubble */}
-        <div
-          className="absolute left-full ml-3 bottom-[var(--tube-percentage)] translate-y-1/2"
-        >
+        {/* Count badge — circle */}
+        <div className="absolute inset-0 flex items-center justify-center z-40">
           <div
-            className="px-3 py-2 text-sm font-bold rounded-full"
+            className="w-9 h-9 rounded-full flex items-center justify-center"
             style={{
-              background: "var(--tube-color)",
-              color: "#1D1D19",
+              background: "rgba(255,255,255,0.85)",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+              backdropFilter: "blur(4px)",
+              border: "2px solid rgba(255,255,255,0.5)",
             }}
           >
-            {percentage}%
+            <span
+              className="text-base font-extrabold"
+              style={{ color: count > 0 ? "#dc2626" : "#6b7280" }}
+            >
+              {count}
+            </span>
           </div>
         </div>
       </div>
 
       {/* Department Label */}
-      <div className="mt-3 text-white font-semibold">{label}</div>
+      <div
+        className="mt-3 px-3 py-1.5 text-sm font-bold uppercase tracking-wide text-center"
+        style={{
+          color: "#f5f0e1",
+          background: "linear-gradient(135deg, rgba(90,70,40,0.85) 0%, rgba(120,95,50,0.85) 100%)",
+          borderRadius: "8px",
+          textShadow: "0 1px 2px rgba(0,0,0,0.4)",
+          border: "1px solid rgba(255,255,255,0.15)",
+          minWidth: "60px",
+        }}
+      >
+        {label}
+      </div>
 
       {/* Keyframes */}
       <style>

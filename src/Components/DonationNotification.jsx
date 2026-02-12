@@ -13,116 +13,174 @@ const processQueue = () => {
   if (isShowing || notificationQueue.length === 0) return;
 
   isShowing = true;
-  const showToast = notificationQueue.shift();
+  const item = notificationQueue.shift();
 
-  const toastId = showToast();
+  // Legacy function-based items
+  if (typeof item === 'function') {
+    const toastId = item();
+    setTimeout(() => {
+      toast.dismiss(toastId);
+      isShowing = false;
+      processQueue();
+    }, 6000);
+    return;
+  }
 
-  // EXACT duration control (4s)
+  // Pure data object — show via PipeSystem events
+  if (item.department) {
+    window.dispatchEvent(new CustomEvent('donation-show', {
+      detail: item
+    }));
+  }
+
+  // Auto-dismiss after 6s, then trigger pipe flow
   setTimeout(() => {
-    toast.dismiss(toastId);
+    window.dispatchEvent(new CustomEvent('donation-hide'));
     isShowing = false;
-    processQueue(); // move to next ONLY after dismiss
-  }, 4000);
+
+    if (item.department) {
+      window.dispatchEvent(new CustomEvent('donation-dismissed', {
+        detail: { department: item.department }
+      }));
+    }
+
+    if (notificationQueue.length === 0) {
+      window.dispatchEvent(new CustomEvent('donation-queue-empty'));
+    }
+
+    processQueue();
+  }, 6000);
 };
 
 /* =========================
-   Toast UI
+   Toast UI (Exported for Pipe.jsx)
 ========================= */
-const DonationToast = ({ donor, department, bloodGroup, visible }) => {
+export const DonationToast = ({ donor, department, bloodGroup, visible = true }) => {
   return (
+    /* Camo border wrapper */
     <div
-      className={`${
-        visible ? "animate-enter" : "animate-leave"
-      } relative max-w-sm w-full backdrop-blur-xl shadow-2xl rounded-3xl pointer-events-auto overflow-hidden`}
+      className="relative w-full overflow-hidden"
       style={{
-        background: "linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(248,250,255,0.95) 100%)",
-        boxShadow: "0 20px 60px -15px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.2), inset 0 1px 0 rgba(255,255,255,0.8)",
-        border: "1px solid rgba(255,255,255,0.3)",
+        borderRadius: '16px',
+        padding: '8px',
+        background: '#5a6b32',
+        boxShadow: '0 6px 24px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(0,0,0,0.2)',
       }}
     >
-      {/* Top gradient accent */}
-      <div 
-        className="h-1"
+      {/* Large organic camo blobs — like the reference image */}
+      <div
+        className="absolute inset-0 pointer-events-none"
         style={{
-          background: "linear-gradient(90deg, #e74c3c 0%, #f39c12 50%, #e74c3c 100%)",
+          borderRadius: '16px',
+          overflow: 'hidden',
+          background: `
+            radial-gradient(ellipse 90px 50px at 10% 20%, #3d4f1e 60%, transparent 61%),
+            radial-gradient(ellipse 70px 60px at 85% 15%, #3d4f1e 60%, transparent 61%),
+            radial-gradient(ellipse 100px 45px at 50% 85%, #3d4f1e 60%, transparent 61%),
+            radial-gradient(ellipse 60px 50px at 25% 75%, #3d4f1e 60%, transparent 61%),
+            radial-gradient(ellipse 80px 55px at 75% 70%, #8b7d3c 60%, transparent 61%),
+            radial-gradient(ellipse 110px 50px at 40% 30%, #8b7d3c 60%, transparent 61%),
+            radial-gradient(ellipse 70px 40px at 90% 50%, #8b7d3c 60%, transparent 61%),
+            radial-gradient(ellipse 85px 60px at 15% 50%, #6b7c3d 60%, transparent 61%),
+            radial-gradient(ellipse 90px 45px at 60% 10%, #6b7c3d 60%, transparent 61%),
+            radial-gradient(ellipse 75px 55px at 70% 40%, #4a5c2a 60%, transparent 61%)
+          `,
         }}
       />
 
-      {/* Dismiss button - positioned absolute */}
-      <button
-        onClick={() => toast.dismiss()}
-        className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full bg-gray-100/80 text-gray-400 hover:text-gray-600 hover:bg-gray-200/80 transition-all z-10"
+      {/* Inner white card */}
+      <div
+        className="relative backdrop-blur-xl shadow-2xl pointer-events-auto overflow-hidden"
+        style={{
+          borderRadius: '16px',
+          background: "linear-gradient(145deg, rgba(255,255,255,0.97) 0%, rgba(248,250,255,0.97) 100%)",
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.9)",
+        }}
       >
-        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
+        {/* Top shimmer accent */}
+        <div
+          className="h-1.5"
+          style={{
+            background: "linear-gradient(90deg, #e74c3c 0%, #f39c12 30%, #e74c3c 60%, #f39c12 100%)",
+            backgroundSize: "200% 100%",
+            animation: "shimmer 2s linear infinite",
+          }}
+        />
 
-      <div className="p-3">
-        {/* Header row */}
-        <div className="flex items-center justify-between mb-2 pr-6">
-          <div className="flex items-center gap-2">
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center shadow-lg"
-              style={{
-                background: "linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)",
-              }}
-            >
-              <span className="text-base">🩸</span>
-            </div>
-            <div>
-              <p className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">
-                Blood Donation
-              </p>
-              <p className="text-[10px] text-gray-400">just now</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            <span className="text-[10px] text-gray-400">LIVE</span>
-          </div>
-        </div>
-
-        {/* Main content - Name is the hero */}
-        <div className="text-center py-1">
-          <p 
-            className="text-lg font-bold mb-1"
-            style={{
-              background: "linear-gradient(135deg, #1768AA 0%, #2980b9 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-            }}
-          >
-            {donor}
-          </p>
-          <div className="flex items-center justify-center gap-2 text-xs text-gray-600">
-            <span className="font-bold">{department}</span>
-            {bloodGroup && (
-              <span 
-                className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow-sm"
+        <div className="p-5">
+          {/* Header row */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <div
+                className="w-11 h-11 rounded-xl flex items-center justify-center shadow-lg"
                 style={{
                   background: "linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)",
                 }}
               >
-                {bloodGroup}
-              </span>
-            )}
+                <span className="text-xl">🩸</span>
+              </div>
+              <div>
+                <p className="text-xs font-bold text-gray-600 uppercase tracking-wider">
+                  Blood Donation
+                </p>
+                <p className="text-[11px] text-gray-400">just now</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-[11px] font-semibold text-gray-400">LIVE</span>
+            </div>
+          </div>
+
+          {/* Main content — donor name */}
+          <div className="text-center py-2">
+            <p
+              className="text-2xl font-extrabold mb-2"
+              style={{
+                background: "linear-gradient(135deg, #1768AA 0%, #2980b9 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+            >
+              {donor}
+            </p>
+            <div className="flex items-center justify-center gap-3 text-base text-gray-600">
+              <span className="font-bold">{department}</span>
+              {bloodGroup && (
+                <span
+                  className="px-2.5 py-0.5 rounded-full text-xs font-bold text-white shadow-sm"
+                  style={{
+                    background: "linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)",
+                  }}
+                >
+                  {bloodGroup}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div
+            className="mt-3 py-2 px-3 rounded-xl text-center"
+            style={{
+              background: "linear-gradient(135deg, rgba(231, 76, 60, 0.08) 0%, rgba(241, 196, 15, 0.08) 100%)",
+            }}
+          >
+            <p className="text-xs font-medium text-gray-700">
+              🎉 Thank you for donating blood! 💖
+            </p>
           </div>
         </div>
-
-        {/* Footer message */}
-        <div 
-          className="mt-2 py-1.5 px-2 rounded-lg text-center"
-          style={{
-            background: "linear-gradient(135deg, rgba(231, 76, 60, 0.1) 0%, rgba(241, 196, 15, 0.1) 100%)",
-          }}
-        >
-          <p className="text-[11px] font-medium text-gray-700">
-            🎉 Thank you for donating blood! 💖
-          </p>
-        </div>
       </div>
+
+      {/* Shimmer keyframes */}
+      <style>{`
+        @keyframes shimmer {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+      `}</style>
     </div>
   );
 };
@@ -135,21 +193,10 @@ export const showDonationNotification = (
   department,
   bloodGroup = null,
 ) => {
-  notificationQueue.push(() => {
-    return toast.custom(
-      (t) => (
-        <DonationToast
-          donor={donor}
-          department={department}
-          bloodGroup={bloodGroup}
-          visible={t.visible}
-        />
-      ),
-      {
-        duration: Infinity, // 👈 we control dismissal
-        position: "top-right",
-      },
-    );
+  notificationQueue.push({
+    donor,
+    department,
+    bloodGroup
   });
 
   processQueue();
@@ -160,9 +207,8 @@ export const showMultipleDonationsNotification = (department, count) => {
     return toast.custom(
       (t) => (
         <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } max-w-md w-full bg-white shadow-2xl rounded-2xl flex ring-1 ring-black/5 overflow-hidden`}
+          className={`${t.visible ? "animate-enter" : "animate-leave"
+            } max-w-md w-full bg-white shadow-2xl rounded-2xl flex ring-1 ring-black/5 overflow-hidden`}
         >
           <div className="w-1.5 bg-red-600" />
           <div className="flex-1 p-4">
