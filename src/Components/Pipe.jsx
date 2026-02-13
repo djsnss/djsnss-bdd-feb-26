@@ -1,5 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
-import { DonationToast } from "./DonationNotification";
+import React, { useEffect, useState } from "react";
 
 const DEPARTMENTS = [
   "COMPS",
@@ -20,67 +19,7 @@ const TOTAL_WIDTH_PER_ITEM = TUBE_WIDTH + GAP;
 const FLOW_DURATION = 2;
 
 const PipeSystem = ({ activeDepartment, onAnimationComplete }) => {
-  const [currentNotification, setCurrentNotification] = useState(null);
   const [activePath, setActivePath] = useState(null);
-  const [animState, setAnimState] = useState("idle");
-  const [notifKey, setNotifKey] = useState(0);
-
-  const pendingNotifRef = useRef(null);
-  const hideTimeoutRef = useRef(null);
-
-  /* ───────────── Notification Event Handling ───────────── */
-
-  useEffect(() => {
-    const handleShow = (event) => {
-      if (hideTimeoutRef.current) {
-        clearTimeout(hideTimeoutRef.current);
-        hideTimeoutRef.current = null;
-      }
-
-      if (animState === "visible" || animState === "entering") {
-        pendingNotifRef.current = event.detail;
-        setAnimState("exiting");
-      } else {
-        setCurrentNotification(event.detail);
-        setNotifKey((k) => k + 1);
-        setAnimState("entering");
-      }
-    };
-
-    const handleHide = () => setAnimState("exiting");
-
-    window.addEventListener("donation-show", handleShow);
-    window.addEventListener("donation-hide", handleHide);
-
-    return () => {
-      window.removeEventListener("donation-show", handleShow);
-      window.removeEventListener("donation-hide", handleHide);
-    };
-  }, [animState]);
-
-  /* ───────────── Animation State Machine ───────────── */
-
-  useEffect(() => {
-    if (animState === "entering") {
-      const t = setTimeout(() => setAnimState("visible"), 600);
-      return () => clearTimeout(t);
-    }
-
-    if (animState === "exiting") {
-      const t = setTimeout(() => {
-        if (pendingNotifRef.current) {
-          setCurrentNotification(pendingNotifRef.current);
-          pendingNotifRef.current = null;
-          setNotifKey((k) => k + 1);
-          setAnimState("entering");
-        } else {
-          setCurrentNotification(null);
-          setAnimState("idle");
-        }
-      }, 500);
-      return () => clearTimeout(t);
-    }
-  }, [animState]);
 
   /* ───────────── Pipe Activation ───────────── */
 
@@ -107,36 +46,11 @@ const PipeSystem = ({ activeDepartment, onAnimationComplete }) => {
     (DEPARTMENTS.length - 1) * GAP;
 
   const centerX = totalWidth / 2;
-  const junctionY = 18;   // compact
-  const endY = 95;        // reduced height
-
-  const getNotifClass = () => {
-    if (animState === "entering") return "notif-enter";
-    if (animState === "exiting") return "notif-exit";
-    if (animState === "visible") return "notif-visible";
-    return "";
-  };
+  const junctionY = 18;
+  const endY = 95;
 
   return (
     <div className="flex flex-col items-center w-full mb-1">
-
-      {/* ───────── Notification Area ───────── */}
-      <div className="relative z-50 mb-1" style={{ minHeight: 75 }}>
-        {currentNotification && (
-          <div
-            key={notifKey}
-            className={`notif-card ${getNotifClass()}`}
-            style={{ width: 440 }}
-          >
-            <DonationToast
-              donor={currentNotification.donor}
-              department={currentNotification.department}
-              bloodGroup={currentNotification.bloodGroup}
-              visible={animState !== "exiting"}
-            />
-          </div>
-        )}
-      </div>
 
       {/* ───────── Pipe SVG System ───────── */}
       <div className="relative" style={{ width: totalWidth, height: endY }}>
@@ -235,24 +149,6 @@ const PipeSystem = ({ activeDepartment, onAnimationComplete }) => {
 
       {/* ───────── Animations ───────── */}
       <style>{`
-        .notif-enter {
-          animation: notifIn 0.6s ease forwards;
-        }
-
-        .notif-exit {
-          animation: notifOut 0.5s ease forwards;
-        }
-
-        @keyframes notifIn {
-          from { opacity: 0; transform: translateY(20px) scale(0.95); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        @keyframes notifOut {
-          from { opacity: 1; }
-          to { opacity: 0; transform: translateY(-20px) scale(0.9); }
-        }
-
         .pipe-flow-active {
           stroke-dasharray: 500;
           stroke-dashoffset: 500;

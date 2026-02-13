@@ -5,7 +5,7 @@ import BombAnimation from "./Components/BombAnimation";
 import "./Styles/App.css";
 import Tube from "./Components/Tube";
 import PipeSystem, { TUBE_WIDTH, GAP } from "./Components/Pipe";
-import { showDonationNotification } from "./Components/DonationNotification";
+import DonationNotification from "./Components/DonationNotification";
 import HeadingBox from "./Components/HeadingBox";
 
 const DEPARTMENTS = [
@@ -20,24 +20,11 @@ const DEPARTMENTS = [
   "OTHER",
 ];
 
-const DEMO_DONATIONS = [
-  { donor: "Aarav Sharma", department: "COMPS", bloodGroup: "O+" },
-  { donor: "Priya Patel", department: "IT", bloodGroup: "A+" },
-  { donor: "Rahul Verma", department: "AIDS", bloodGroup: "B+" },
-  { donor: "Sneha Joshi", department: "EXTC", bloodGroup: "AB-" },
-  { donor: "Vikram Singh", department: "MECH", bloodGroup: "O-" },
-  { donor: "Ananya Rao", department: "CSEDS", bloodGroup: "A-" },
-  { donor: "Karan Mehta", department: "AIML", bloodGroup: "B-" },
-  { donor: "Divya Nair", department: "ICB", bloodGroup: "O+" },
-  { donor: "Arjun Gupta", department: "COMPS", bloodGroup: "AB+" },
-];
-
 function App() {
   const [tubeCounts, setTubeCounts] = useState(
     DEPARTMENTS.reduce((acc, dept) => ({ ...acc, [dept]: 0 }), {}),
   );
   const [activePipe, setActivePipe] = useState(null);
-  const [demoStarted, setDemoStarted] = useState(false);
 
   useEffect(() => {
     const handleDonationDismissed = (event) => {
@@ -61,16 +48,6 @@ function App() {
       setActivePipe(null);
     }
   }, [activePipe]);
-
-  const startDemo = () => {
-    if (demoStarted) return;
-    setDemoStarted(true);
-    DEMO_DONATIONS.forEach((d, i) => {
-      setTimeout(() => {
-        showDonationNotification(d.donor, d.department, d.bloodGroup);
-      }, i * 100);
-    });
-  };
 
   return (
     <div className="app-container relative w-full h-screen overflow-hidden">
@@ -97,9 +74,8 @@ function App() {
         />
       </div>
 
-      {/* ───────── HEADER (Placed ABOVE Transparent Box) ───────── */}
-      <HeadingBox/>
-      {/* ─────────────────────────────────────────────────────────── */}
+      {/* ───────── HEADER ───────── */}
+      <HeadingBox />
 
       {/* Transparent Glass Container */}
       <div className="absolute inset-0 z-20 flex items-center justify-center">
@@ -143,21 +119,8 @@ function App() {
         </div>
       </div>
 
-      {/* Demo Button */}
-      <button
-        onClick={startDemo}
-        disabled={demoStarted}
-        className="fixed bottom-4 left-4 z-50 px-5 py-2.5 text-white font-bold rounded-xl shadow-lg transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-        style={{
-          background: demoStarted
-            ? "rgba(107,114,128,0.7)"
-            : "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
-          backdropFilter: "blur(8px)",
-          border: "1px solid rgba(255,255,255,0.2)",
-        }}
-      >
-        {demoStarted ? "⏳ Running..." : "🩸 Start Demo"}
-      </button>
+      {/* Right-side Donation Notifications */}
+      <DonationNotification />
     </div>
   );
 }

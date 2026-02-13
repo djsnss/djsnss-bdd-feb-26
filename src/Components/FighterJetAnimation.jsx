@@ -6,7 +6,7 @@ const FighterJetAnimation = () => {
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
-    
+
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
@@ -32,32 +32,32 @@ const FighterJetAnimation = () => {
 
       draw(ctx) {
         if (this.opacity <= 0) return;
-        
+
         // Add subtle glow effect
         ctx.shadowColor = 'rgba(255, 255, 255, 0.5)';
         ctx.shadowBlur = 8;
-        
+
         // Outer ring
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         ctx.strokeStyle = `rgba(255, 255, 255, ${this.opacity * 0.45})`;
         ctx.lineWidth = 3.5;
         ctx.stroke();
-        
+
         // Middle ring
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius * 0.8, 0, Math.PI * 2);
         ctx.strokeStyle = `rgba(230, 240, 255, ${this.opacity * 0.3})`;
         ctx.lineWidth = 2;
         ctx.stroke();
-        
+
         // Inner ring
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius * 0.6, 0, Math.PI * 2);
         ctx.strokeStyle = `rgba(200, 220, 255, ${this.opacity * 0.2})`;
         ctx.lineWidth = 1.5;
         ctx.stroke();
-        
+
         ctx.shadowBlur = 0;
       }
 
@@ -103,7 +103,7 @@ const FighterJetAnimation = () => {
         gradient.addColorStop(0.4, `rgba(${color.r}, ${color.g}, ${color.b}, ${this.opacity * 0.6})`);
         gradient.addColorStop(0.7, `rgba(${color.r}, ${color.g}, ${color.b}, ${this.opacity * 0.3})`);
         gradient.addColorStop(1, `rgba(${color.r}, ${color.g}, ${color.b}, 0)`);
-        
+
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fillStyle = gradient;
@@ -131,11 +131,12 @@ const FighterJetAnimation = () => {
         this.afterburnerIntensity = 0.8 + Math.random() * 0.2;
         this.lastShockwave = 0;
         this.colorCycle = 0; // For tricolor cycling
+        this.leftScreen = false; // Track if jet has exited the screen
       }
 
       update(timestamp, shockwaves) {
         this.time += 0.05;
-        
+
         // Smooth banking
         this.bankAngle += (this.targetBank - this.bankAngle) * 0.02;
         if (Math.random() < 0.005) {
@@ -145,7 +146,7 @@ const FighterJetAnimation = () => {
         // Movement with slight oscillation
         const speedVar = Math.sin(this.time * 0.5) * 2;
         this.speed = this.baseSpeed + speedVar;
-        
+
         if (this.fromRight) {
           this.x -= this.speed;
           this.y -= this.speed * 0.08 + Math.sin(this.time) * 0.5;
@@ -154,40 +155,41 @@ const FighterJetAnimation = () => {
           this.y -= this.speed * 0.08 + Math.sin(this.time) * 0.5;
         }
 
-        // Generate tricolor contrail - positioned at actual engine nozzles
-        if (Math.random() > 0.2) {
-          // Engine nozzle positions are at -80 in local X coords (after afterburner draw point)
-          // Engine 1 is at Y = -5, Engine 2 is at Y = 5 in local coords
-          // We need to transform these based on rotation
-          const engineLocalX = -85; // Slightly behind the afterburner
+        // Check if the jet has left the screen
+        if (!this.leftScreen) {
+          const offScreen = this.fromRight
+            ? (this.x < -300 || this.y < -200)
+            : (this.x > canvas.width + 300 || this.y < -200);
+          if (offScreen) {
+            this.leftScreen = true;
+          }
+        }
+
+        // Generate tricolor contrail only if still on screen
+        if (!this.leftScreen && Math.random() > 0.2) {
+          const engineLocalX = -85;
           const engine1LocalY = -5;
           const engine2LocalY = 5;
-          
-          // Apply rotation transformation for smoke position
+
           const cosR = Math.cos(this.rotation + this.bankAngle);
           const sinR = Math.sin(this.rotation + this.bankAngle);
-          
-          // Transform engine 1 position
+
           const eng1WorldX = this.x + (engineLocalX * cosR - engine1LocalY * sinR) * this.scale;
           const eng1WorldY = this.y + (engineLocalX * sinR + engine1LocalY * cosR) * this.scale;
-          
-          // Transform engine 2 position
+
           const eng2WorldX = this.x + (engineLocalX * cosR - engine2LocalY * sinR) * this.scale;
           const eng2WorldY = this.y + (engineLocalX * sinR + engine2LocalY * cosR) * this.scale;
-          
-          // Cycle through saffron (0), white (1), green (2)
+
           const colorIndex = Math.floor(this.colorCycle / 8) % 3;
           this.colorCycle++;
-          
-          // Engine 1 smoke
+
           this.contrailParticles.push(new ContrailParticle(
             eng1WorldX,
             eng1WorldY,
             6 + Math.random() * 4,
             colorIndex
           ));
-          
-          // Engine 2 smoke
+
           this.contrailParticles.push(new ContrailParticle(
             eng2WorldX,
             eng2WorldY,
@@ -218,7 +220,7 @@ const FighterJetAnimation = () => {
         ctx.scale(this.scale, this.scale);
 
         // === SUKHOI SU-30 INSPIRED SILHOUETTE ===
-        
+
         // Shadow underneath
         ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
         ctx.beginPath();
@@ -257,7 +259,7 @@ const FighterJetAnimation = () => {
         ctx.lineTo(45, -3);
         ctx.closePath();
         ctx.fill();
-        
+
         // Canopy frame
         ctx.strokeStyle = '#0f0d0b';
         ctx.lineWidth = 1;
@@ -362,7 +364,7 @@ const FighterJetAnimation = () => {
 
         // AFTERBURNER EFFECTS
         const intensity = this.afterburnerIntensity;
-        
+
         // Engine 1 afterburner
         this.drawAfterburner(ctx, -80, -5, intensity);
         // Engine 2 afterburner
@@ -396,7 +398,7 @@ const FighterJetAnimation = () => {
         outerGlow.addColorStop(0, `rgba(255, 100, 20, ${intensity * 0.4})`);
         outerGlow.addColorStop(0.5, `rgba(255, 50, 0, ${intensity * 0.2})`);
         outerGlow.addColorStop(1, 'rgba(200, 30, 0, 0)');
-        
+
         ctx.beginPath();
         ctx.ellipse(x - 20, y, 35, 12, 0, 0, Math.PI * 2);
         ctx.fillStyle = outerGlow;
@@ -442,16 +444,17 @@ const FighterJetAnimation = () => {
       draw(ctx) {
         // Draw contrail first (behind jet)
         this.contrailParticles.forEach(p => p.draw(ctx));
-        
+
         // Draw the jet
         this.drawJet(ctx);
       }
 
       isAlive() {
-        if (this.fromRight) {
-          return this.x > -300 && this.y > -200;
+        // Keep alive while smoke particles are still fading out
+        if (this.leftScreen) {
+          return this.contrailParticles.length > 0;
         }
-        return this.x < canvas.width + 300 && this.y > -200;
+        return true;
       }
     }
 

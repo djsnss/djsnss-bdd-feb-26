@@ -1,272 +1,331 @@
-import toast, { Toaster } from "react-hot-toast";
+import React, { useState, useEffect, useRef } from "react";
 
-/* =========================
-   Queue State
-========================= */
-let notificationQueue = [];
-let isShowing = false;
+const API_BASE = "https://djsnss-bdd-feb-26.onrender.com/bdd-feb26";
+const POLL_INTERVAL = 30000;
 
-/* =========================
-   Queue Processor
-========================= */
-const processQueue = () => {
-  if (isShowing || notificationQueue.length === 0) return;
+const DonationNotification = () => {
+  const [donor, setDonor] = useState(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const [animClass, setAnimClass] = useState("");
+  const prevFirstRef = useRef(null);
 
-  isShowing = true;
-  const item = notificationQueue.shift();
+  const fetchDonors = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/latest-donors`);
+      if (!res.ok) throw new Error("API error");
+      const data = await res.json();
 
-  // Legacy function-based items
-  if (typeof item === "function") {
-    const toastId = item();
-    setTimeout(() => {
-      toast.dismiss(toastId);
-      isShowing = false;
-      processQueue();
-    }, 6000);
-    return;
-  }
+      if (data.length > 0) {
+        const latestName = data[0];
 
-  // Pure data object — show via PipeSystem events
-  if (item.department) {
-    window.dispatchEvent(
-      new CustomEvent("donation-show", {
-        detail: item,
-      }),
-    );
-  }
+        if (latestName !== prevFirstRef.current) {
+          prevFirstRef.current = latestName;
 
-  // Auto-dismiss after 6s, then trigger pipe flow
-  setTimeout(() => {
-    window.dispatchEvent(new CustomEvent("donation-hide"));
-    isShowing = false;
+          if (isVisible) {
+            setAnimClass("notif-exit-right");
+            await new Promise((r) => setTimeout(r, 500));
+          }
 
-    if (item.department) {
-      window.dispatchEvent(
-        new CustomEvent("donation-dismissed", {
-          detail: { department: item.department },
-        }),
-      );
+          setDonor(latestName);
+          setIsVisible(true);
+          setAnimClass("notif-enter-right");
+        }
+      }
+    } catch (err) {
+      console.error("Failed to fetch latest donors:", err);
     }
+  };
 
-    if (notificationQueue.length === 0) {
-      window.dispatchEvent(new CustomEvent("donation-queue-empty"));
-    }
+  useEffect(() => {
+    fetchDonors();
+    const interval = setInterval(fetchDonors, POLL_INTERVAL);
+    return () => clearInterval(interval);
+  }, []);
 
-    processQueue();
-  }, 6000);
-};
+  if (!isVisible || !donor) return null;
 
-/* =========================
-   Toast UI (Exported for Pipe.jsx)
-========================= */
-export const DonationToast = ({
-  donor,
-  department,
-  bloodGroup,
-  visible = true,
-}) => {
+  const donorName = typeof donor === "object" ? donor.name : donor;
+  const department = typeof donor === "object" ? donor.department : "IT";
+  const bloodGroup = typeof donor === "object" ? donor.bloodGroup : "AB+";
+
   return (
-    /* Camo border wrapper */
     <div
-      className="relative w-full overflow-hidden"
+      className={animClass}
       style={{
-        borderRadius: "16px",
-        padding: "8px",
-        background: "#5a6b32",
-        boxShadow:
-          "0 6px 24px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(0,0,0,0.2)",
+        position: "fixed",
+        top: "28px",
+        right: "24px",
+        zIndex: 9999,
+        width: "400px",
+        height: "150px",
       }}
     >
-      {/* Large organic camo blobs — like the reference image */}
+      {/* Card */}
       <div
-        className="absolute inset-0 pointer-events-none"
         style={{
-          borderRadius: "16px",
-          overflow: "hidden",
-          background: `
-            radial-gradient(ellipse 90px 50px at 10% 20%, #3d4f1e 60%, transparent 61%),
-            radial-gradient(ellipse 70px 60px at 85% 15%, #3d4f1e 60%, transparent 61%),
-            radial-gradient(ellipse 100px 45px at 50% 85%, #3d4f1e 60%, transparent 61%),
-            radial-gradient(ellipse 60px 50px at 25% 75%, #3d4f1e 60%, transparent 61%),
-            radial-gradient(ellipse 80px 55px at 75% 70%, #8b7d3c 60%, transparent 61%),
-            radial-gradient(ellipse 110px 50px at 40% 30%, #8b7d3c 60%, transparent 61%),
-            radial-gradient(ellipse 70px 40px at 90% 50%, #8b7d3c 60%, transparent 61%),
-            radial-gradient(ellipse 85px 60px at 15% 50%, #6b7c3d 60%, transparent 61%),
-            radial-gradient(ellipse 90px 45px at 60% 10%, #6b7c3d 60%, transparent 61%),
-            radial-gradient(ellipse 75px 55px at 70% 40%, #4a5c2a 60%, transparent 61%)
-          `,
-        }}
-      />
-
-      {/* Inner white card */}
-      <div
-        className="relative backdrop-blur-xl shadow-2xl pointer-events-auto overflow-hidden"
-        style={{
-          borderRadius: "16px",
+          position: "relative",
+          borderRadius: "18px",
           background:
-            "linear-gradient(145deg, rgba(255,255,255,0.97) 0%, rgba(248,250,255,0.97) 100%)",
-          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.9)",
+            "linear-gradient(160deg, rgba(255,255,255,0.98) 0%, rgba(250,252,255,0.96) 100%)",
+          boxShadow:
+            "0 12px 40px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,1)",
+          overflow: "hidden",
         }}
       >
-        {/* Top shimmer accent */}
+
+        {/* Smooth subtle accent line */}
         <div
-          className="h-1.5"
           style={{
+            height: "3px",
             background:
-              "linear-gradient(90deg, #e74c3c 0%, #f39c12 30%, #e74c3c 60%, #f39c12 100%)",
-            backgroundSize: "200% 100%",
-            animation: "shimmer 2s linear infinite",
+              "linear-gradient(90deg, #e8b4b8, #c0392b, #e8b4b8)",
+            opacity: 0.6,
+            animation: "smoothBreath 4s ease-in-out infinite",
           }}
         />
 
-        <div className="p-3">
+        {/* Content */}
+        <div style={{ padding: "16px 20px 14px" }}>
           {/* Header row */}
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-3">
-              <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center shadow-lg"
-                style={{
-                  background:
-                    "linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)",
-                }}
-              >
-                <span className="text-lg">🩸</span>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: "10px",
+            }}
+          >
+            <div
+              style={{ display: "flex", alignItems: "center", gap: "10px" }}
+            >
+              <div style={{ position: "relative" }}>
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: "-4px",
+                    borderRadius: "14px",
+                    border: "2px solid rgba(231,76,60,0.15)",
+                    animation: "pulseRing 2s ease-out infinite",
+                  }}
+                />
+                <div
+                  style={{
+                    width: "44px",
+                    height: "44px",
+                    borderRadius: "12px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    background:
+                      "linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)",
+                    boxShadow:
+                      "0 4px 12px rgba(239,68,68,0.35), inset 0 1px 0 rgba(255,255,255,0.2)",
+                  }}
+                >
+                  <span style={{ fontSize: "22px", filter: "brightness(1.2)" }}>
+                    🩸
+                  </span>
+                </div>
               </div>
               <div>
-                <p className="text-xs font-bold text-gray-600 uppercase tracking-wider">
-                  Blood Donation
+                <p
+                  style={{
+                    fontSize: "13px",
+                    fontWeight: 800,
+                    color: "#374151",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.1em",
+                    margin: 0,
+                  }}
+                >
+                  Blood Donated
                 </p>
-                <p className="text-[11px] text-gray-400">just now</p>
+                <p
+                  style={{
+                    fontSize: "11px",
+                    color: "#9ca3af",
+                    margin: "1px 0 0 0",
+                    fontWeight: 500,
+                  }}
+                >
+                  just now
+                </p>
               </div>
             </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-[11px] font-semibold text-gray-400">
+
+            {/* Live badge */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+                padding: "3px 10px 3px 7px",
+                borderRadius: "20px",
+                background: "rgba(34,197,94,0.08)",
+                border: "1px solid rgba(34,197,94,0.15)",
+              }}
+            >
+              <div
+                style={{
+                  width: "7px",
+                  height: "7px",
+                  borderRadius: "50%",
+                  background: "#22c55e",
+                  boxShadow: "0 0 6px rgba(34,197,94,0.5)",
+                  animation: "livePulse 1.5s ease-in-out infinite",
+                }}
+              />
+              <span
+                style={{
+                  fontSize: "10px",
+                  fontWeight: 800,
+                  color: "#16a34a",
+                  letterSpacing: "0.05em",
+                }}
+              >
                 LIVE
               </span>
             </div>
           </div>
 
-          {/* Main content — donor name */}
-          <div className="text-center py-1">
-            <p
-              className="text-xl font-extrabold mb-1"
-              style={{
-                background: "linear-gradient(135deg, #1768AA 0%, #2980b9 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}
-            >
-              {donor}
-            </p>
-            <div className="flex items-center justify-center gap-3 text-base text-gray-600">
-              <span className="font-bold">{department}</span>
-              {bloodGroup && (
-                <span
-                  className="px-2.5 py-0.5 rounded-full text-xs font-bold text-white shadow-sm"
-                  style={{
-                    background:
-                      "linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)",
-                  }}
-                >
-                  {bloodGroup}
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div
-            className="mt-2 py-1 px-3 rounded-xl text-center"
+          {/* Donor name */}
+          <p
             style={{
+              margin: "0 0 8px 0",
+              fontSize: "26px",
+              fontWeight: 900,
               background:
-                "linear-gradient(135deg, rgba(231, 76, 60, 0.08) 0%, rgba(241, 196, 15, 0.08) 100%)",
+                "linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              letterSpacing: "-0.01em",
+              textAlign: "center",
             }}
           >
-            <p className="text-xs font-medium text-gray-700">
+            {donorName}
+          </p>
+
+          {/* Dept + Blood group row */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "10px",
+              marginBottom: "10px",
+            }}
+          >
+            <span
+              style={{
+                padding: "3px 14px",
+                borderRadius: "8px",
+                fontSize: "15px",
+                fontWeight: 700,
+                color: "#374151",
+                background: "rgba(0,0,0,0.04)",
+                border: "1px solid rgba(0,0,0,0.06)",
+              }}
+            >
+              {department}
+            </span>
+            <span
+              style={{
+                padding: "3px 12px",
+                borderRadius: "8px",
+                fontSize: "14px",
+                fontWeight: 800,
+                color: "#fff",
+                background:
+                  "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
+                boxShadow: "0 2px 8px rgba(239,68,68,0.3)",
+                letterSpacing: "0.02em",
+              }}
+            >
+              {bloodGroup}
+            </span>
+          </div>
+
+          {/* Footer message */}
+          <div
+            style={{
+              padding: "8px 14px",
+              borderRadius: "12px",
+              background:
+                "linear-gradient(135deg, rgba(255,153,51,0.06) 0%, rgba(19,136,8,0.06) 100%)",
+              border: "1px solid rgba(0,0,0,0.03)",
+              textAlign: "center",
+            }}
+          >
+            <p
+              style={{
+                margin: 0,
+                fontSize: "15px",
+                fontWeight: 600,
+                color: "#6b7280",
+                letterSpacing: "0.01em",
+              }}
+            >
               🎉 Thank you for donating blood! 💖
             </p>
           </div>
         </div>
       </div>
 
-      {/* Shimmer keyframes */}
+      {/* Animations */}
       <style>{`
-        @keyframes shimmer {
-          0% { background-position: 200% 0; }
-          100% { background-position: -200% 0; }
+        @keyframes smoothBreath {
+          0%, 100% { opacity: 0.4; }
+          50% { opacity: 0.7; }
+        }
+
+        @keyframes nameShine {
+          0%, 100% { background-position: 200% 0; }
+          50% { background-position: 0% 0; }
+        }
+        @keyframes pulseRing {
+          0% { transform: scale(1); opacity: 0.6; }
+          70% { transform: scale(1.25); opacity: 0; }
+          100% { transform: scale(1.25); opacity: 0; }
+        }
+
+        @keyframes livePulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.5; transform: scale(0.85); }
+        }
+
+        .notif-enter-right {
+          animation: slideDownIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .notif-exit-right {
+          animation: slideUpOut 0.4s ease forwards;
+        }
+
+        @keyframes slideDownIn {
+          from {
+            opacity: 0;
+            transform: translateY(-20px) scale(0.96);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+
+        @keyframes slideUpOut {
+          from {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+          to {
+            opacity: 0;
+            transform: translateY(-20px) scale(0.96);
+          }
         }
       `}</style>
     </div>
   );
 };
 
-/* =========================
-   Public API
-========================= */
-export const showDonationNotification = (
-  donor,
-  department,
-  bloodGroup = null,
-) => {
-  notificationQueue.push({
-    donor,
-    department,
-    bloodGroup,
-  });
-
-  processQueue();
-};
-
-export const showMultipleDonationsNotification = (department, count) => {
-  notificationQueue.push(() => {
-    return toast.custom(
-      (t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } max-w-md w-full bg-white shadow-2xl rounded-2xl flex ring-1 ring-black/5 overflow-hidden`}
-        >
-          <div className="w-1.5 bg-red-600" />
-          <div className="flex-1 p-4">
-            <p className="text-xs font-semibold text-gray-500">
-              Blood Donation Drive
-            </p>
-            <p className="text-sm font-bold text-gray-900 mt-1">
-              🎉 {count} New Donations!
-            </p>
-            <p className="text-sm text-gray-700">
-              {department} received{" "}
-              <span className="font-bold text-blue-600">{count}</span> donations
-            </p>
-          </div>
-        </div>
-      ),
-      {
-        duration: Infinity,
-        position: "top-right",
-      },
-    );
-  });
-
-  processQueue();
-};
-
-/* =========================
-   Toaster
-========================= */
-export const DonationToaster = () => (
-  <Toaster
-    position="top-right"
-    toastOptions={{
-      style: {
-        background: "transparent",
-        boxShadow: "none",
-        padding: 0,
-      },
-    }}
-  />
-);
-
-export default DonationToaster;
+export default DonationNotification;
