@@ -98,7 +98,7 @@ const Tube = ({ count = 0, color = "#dc2626", label = "COMPS" }) => {
         className="mt-3 px-3 py-1.5 text-sm font-bold uppercase tracking-wide text-center"
         style={{
           color: "#f5f0e1",
-          background: "linear-gradient(135deg, rgba(90,70,40,0.85) 0%, rgba(120,95,50,0.85) 100%)",
+          background: "red",
           borderRadius: "8px",
           textShadow: "0 1px 2px rgba(0,0,0,0.4)",
           border: "1px solid rgba(255,255,255,0.15)",
