@@ -73,7 +73,7 @@ const FighterJetAnimation = () => {
         this.y = y;
         this.size = size;
         this.opacity = 0.75;
-        this.decay = 0.0015 + Math.random() * 0.001;
+        this.decay = 0.003 + Math.random() * 0.002;
         this.drift = (Math.random() - 0.5) * 0.2;
         this.rise = (Math.random() - 0.5) * 0.2;
         this.jetAngle = jetAngle;
