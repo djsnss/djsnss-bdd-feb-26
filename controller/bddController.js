@@ -54,7 +54,7 @@ const range = "Form responses 1!H:H";
 console.log("Spreadsheet ID:", SPREADSHEET_ID);
 console.log("Range:", range);
 
-// Categories
+// Categoriesg
 let categoryCounts = {
   AIDS: 0,
   AIML: 0,
@@ -127,12 +127,30 @@ export async function getLatestDonors(){
   const nameIdx = headers.indexOf("Full Name");
   const statusIdx = headers.indexOf("Donated ");
   const timeIdx = headers.indexOf("Timestamp");
+  const bloodGroupIdx = headers.indexOf("Blood Group");
+  const departmentIdx = headers.indexOf("Department");
+
+  console.log(rows[0][timeIdx])
+  console.log(new Date(rows[0][timeIdx]))
+
 
   const donors = rows
     .filter(r => r[statusIdx] === "Donated")
-    .sort((a, b) => new Date(b[timeIdx]) - new Date(a[timeIdx]))
-    .slice(0, 5)
-    .map(r => r[nameIdx]);
+    .sort((a, b) => {
+      const parseDate = (dateStr) => {
+        if (!dateStr) return 0;
+        const [datePart,timePart] = dateStr.split(" ");
+        const [day, month, year] = datePart.split("/");
+        return new Date(`${year}-${month}-${day}T${timePart}`);
+      };
+      return parseDate(b[timeIdx]) - parseDate(a[timeIdx]);
+    })
+    .slice(0, 1)
+    .map(r => ({
+      name:r[nameIdx],
+      bloodGroup: r[bloodGroupIdx],
+      department: r[departmentIdx]
+    }));
     console.log("Latest donors:", donors);
     return donors;
 
