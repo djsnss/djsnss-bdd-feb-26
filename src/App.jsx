@@ -73,9 +73,27 @@ function App() {
           className="w-14 h-14 object-contain rounded-full"
         />
       </div>
+      
+{/* Indian Flag */}
+<div
+  className="
+    absolute
+    left-[-70px]     
+    top-[220px]      
+    z-50             
+    pointer-events-none
+  "
+>
+  <img
+    src="/assets/flag_gpt.png"
+    alt="flag"
+    className="w-[338px] h-auto object-contain"
+  />
+</div>
+
 
       {/* ───────── HEADER ───────── */}
-      <HeadingBox />
+<HeadingBox text="BLOOD DONATION DRIVE 2026" />
 
       {/* Transparent Glass Container */}
       <div className="absolute inset-0 z-20 flex items-center justify-center">
