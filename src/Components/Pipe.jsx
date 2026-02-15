@@ -31,8 +31,9 @@ const PipeSystem = ({ activeDepartment, onAnimationComplete }) => {
 
     const timer = setTimeout(() => {
       onAnimationComplete && onAnimationComplete();
-      setTimeout(() => setActivePath(null), 600);
-    }, FLOW_DURATION * 1000);
+      // Wait for drain animation to finish (Total 3s)
+      setTimeout(() => setActivePath(null), 1200); 
+    }, 1800); // Trigger at 60% of 3s (1.8s)
 
     return () => clearTimeout(timer);
   }, [activeDepartment, onAnimationComplete]);
@@ -92,11 +93,16 @@ const PipeSystem = ({ activeDepartment, onAnimationComplete }) => {
 
             const midY = junctionY + (endY - junctionY) * 0.4;
 
+            let pathEndX = slotCenter;
+            if (Math.abs(pathEndX - centerX) < 0.5) {
+              pathEndX = centerX + 0.5; // Ensure non-zero width for filter BBox
+            }
+
             const pathData = `
               M ${centerX} ${junctionY}
               C ${centerX} ${midY},
-                ${slotCenter} ${midY},
-                ${slotCenter} ${endY}
+                ${pathEndX} ${midY},
+                ${pathEndX} ${endY}
             `;
 
             const isActive = activePath === i;
@@ -142,14 +148,15 @@ const PipeSystem = ({ activeDepartment, onAnimationComplete }) => {
       {/* Animation */}
       <style>{`
         .pipe-flow-active {
-          stroke-dasharray: 500;
-          stroke-dashoffset: 500;
-          animation: flow ${FLOW_DURATION}s ease forwards;
+          stroke-dasharray: 1000;
+          stroke-dashoffset: 1000;
+          animation: flow 3s ease-in-out forwards;
         }
 
         @keyframes flow {
-          from { stroke-dashoffset: 500; }
-          to { stroke-dashoffset: 0; }
+          0% { stroke-dashoffset: 1000; }
+          60% { stroke-dashoffset: 0; }
+          100% { stroke-dashoffset: -1000; }
         }
       `}</style>
     </div>
