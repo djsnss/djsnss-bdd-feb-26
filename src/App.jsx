@@ -9,15 +9,15 @@ import DonationNotification from "./Components/DonationNotification";
 import HeadingBox from "./Components/HeadingBox";
 
 const DEPARTMENTS = [
-  "COMPS",
-  "IT",
-  "CSEDS",
   "AIDS",
   "AIML",
-  "ICB",
+  "COMPS",
+  "CSEDS",
   "EXTC",
+  "ICB",
+  "IT",
   "MECH",
-  "OTHER",
+  "Outsider",
 ];
 
 function App() {
@@ -27,10 +27,38 @@ function App() {
 
   const [activePipe, setActivePipe] = useState(null);
 
+  const [isRandomFlow, setIsRandomFlow] = useState(false);
+
+  // Fetch initial counts
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const response = await fetch("https://djsnss-bdd-feb-26.onrender.com/bdd-feb26/counts");
+        const data = await response.json();
+        
+        // Ensure data matches our DEPARTMENTS keys
+        const formattedCounts = {};
+        DEPARTMENTS.forEach(dept => {
+          formattedCounts[dept] = data[dept] || 0;
+        });
+        
+        setTubeCounts(formattedCounts);
+      } catch (error) {
+        console.error("Failed to fetch counts:", error);
+      }
+    };
+
+    fetchCounts();
+    // Optional: Poll every 10 seconds to keep updated
+    const interval = setInterval(fetchCounts, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
   useEffect(() => {
     const handleDonationDismissed = (event) => {
       const { department } = event.detail;
       if (DEPARTMENTS.includes(department)) {
+        setIsRandomFlow(false); // It's a real donation
         setActivePipe(department);
       }
     };
@@ -43,15 +71,33 @@ function App() {
       );
   }, []);
 
-  const handleAnimationComplete = useCallback(() => {
-    if (activePipe) {
-      setTubeCounts((prev) => ({
-        ...prev,
-        [activePipe]: prev[activePipe] + 1,
-      }));
-      setActivePipe(null);
+  // Random flow effect
+  useEffect(() => {
+    if (!activePipe) {
+      const delay = Math.random() * 2000 + 1000; // 1-3 seconds delay
+      const timeout = setTimeout(() => {
+        const randomDept = DEPARTMENTS[Math.floor(Math.random() * DEPARTMENTS.length)];
+        setIsRandomFlow(true); // Mark as random
+        setActivePipe(randomDept);
+      }, delay);
+      
+      return () => clearTimeout(timeout);
     }
   }, [activePipe]);
+
+  const handleAnimationComplete = useCallback(() => {
+    if (activePipe) {
+      // Only increment if it's NOT a random flow
+      if (!isRandomFlow) {
+        setTubeCounts((prev) => ({
+          ...prev,
+          [activePipe]: prev[activePipe] + 1,
+        }));
+      }
+      setActivePipe(null);
+      setIsRandomFlow(false); // Reset flag
+    }
+  }, [activePipe, isRandomFlow]);
 
   return (
     <div className="app-container relative w-full min-h-screen overflow-hidden flex flex-col items-center">
@@ -93,7 +139,7 @@ function App() {
       {/* Scrollable Main Content Wrapper */}
       <div className="relative z-10 w-full flex-grow flex flex-col items-center overflow-auto pt-8 pb-12">
         {/* Header */}
-        <div className="mb-0 w-full flex justify-center px-4 z-20 -mb-4">
+        <div className="mb-0 w-full flex justify-center px-4 z-20 -mb-4 mt-10">
           <HeadingBox text="BLOOD DONATION DRIVE 2026" />
         </div>
 
@@ -133,7 +179,7 @@ function App() {
 
               {/* Tubes */}
               <div
-                className="flex items-end mt-2 w-full justify-between"
+                className="flex items-end w-full justify-between"
               >
                 {DEPARTMENTS.map((dept) => (
                   <Tube

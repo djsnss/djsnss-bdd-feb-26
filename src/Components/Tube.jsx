@@ -60,7 +60,7 @@ const Tube = ({ count = 0, color = "#dc2626", label = "COMPS" }) => {
         {/* Count badge — circle */}
         <div className="absolute inset-0 flex items-center justify-center z-40">
           <div
-            className="w-[60px] h-[60px] rounded-full flex items-center justify-center"
+            className="w-[60px] h-[40px] rounded-full flex items-center justify-center"
             style={{
               background: "rgba(255,255,255,0.85)",
               boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
