@@ -2,14 +2,13 @@ import React from "react";
 
 const HeadingBox = ({ text }) => {
   return (
-    <div className="flex justify-center w-full">
-
+<div className="flex justify-center w-full mt-[3vh]"> 
       {/* Military Border */}
       <div
         className="
           inline-block
-          px-8 py-6
-          rounded-2xl
+          px-[4.8vh] py-[3.8vh]
+          rounded-[2vh]
         "
         style={{
           backgroundImage: "url('/assets/HeadingBox.png')",
@@ -22,18 +21,21 @@ const HeadingBox = ({ text }) => {
         <div
           className="
             bg-[#e6d2a1]
-            px-10 py-6
-            min-w-[300px]
-            max-w-[60vw]
-            rounded-xl
-            border-dashed border-4 border-[#4B5320]
+            px-[4.8vh] py-[3.8vh]
+            min-w-[30vh]
+            max-w-[70vh]
+            rounded-[1.5vh]
+            border-dashed border-[0.5vh] border-[#4B5320]
             flex items-center justify-center
           "
         >
-          <h2 className="
-            text-2xl font-extrabold text-[#4B5320] text-center
-            whitespace-normal break-words
-          ">
+          <h2
+            className="
+              font-extrabold text-[#4B5320] text-center
+              whitespace-normal break-words
+              text-[3.5vh]
+            "
+          >
             {text}
           </h2>
         </div>

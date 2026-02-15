@@ -144,13 +144,14 @@ function App() {
       </div>
 
       {/* Indian Flag */}
-      <div className="absolute left-[-70px] top-[220px] z-0 pointer-events-none opacity-80">
-        <img
-          src="/assets/flag_gpt.png"
-          alt="flag"
-          className="w-[338px] h-auto object-contain"
-        />
-      </div>
+<div className="absolute left-[-4vw] bottom-[17vh] z-10 pointer-events-none">
+  <img
+    src="/assets/flag_gpt.png"
+    alt="flag"
+    className="w-[18vw] h-auto object-contain"
+  />
+</div>
+
 
       {/* Scrollable Main Content Wrapper */}
       <div className="relative z-10 w-full flex-grow flex flex-col items-center overflow-auto pt-8 pb-12">
