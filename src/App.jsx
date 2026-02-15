@@ -90,8 +90,8 @@ function App() {
     // Continuous random flow
     const delay = Math.random() * 1000 + 500; // 0.5s - 1.5s delay (Continuous)
     
-      const timeout = setTimeout(() => {
-        const randomDept = DEPARTMENTS[Math.floor(Math.random() * DEPARTMENTS.length)];
+    const timeout = setTimeout(() => {
+      const randomDept = DEPARTMENTS[Math.floor(Math.random() * DEPARTMENTS.length)];
       
       // Trigger random flow
       setActivePipe({
@@ -100,18 +100,18 @@ function App() {
         id: Date.now() + Math.random()
       });
       
-      }, delay);
-      
-      return () => clearTimeout(timeout);
+    }, delay);
+    
+    return () => clearTimeout(timeout);
   }, [activePipe]); // Re-run whenever activePipe changes (which acts as our loop)
 
   const handleAnimationComplete = useCallback((completedAnim) => {
     if (completedAnim && !completedAnim.isRandom) {
-        setTubeCounts((prev) => ({
-          ...prev,
+      setTubeCounts((prev) => ({
+        ...prev,
         [completedAnim.dept]: prev[completedAnim.dept] + 1,
-        }));
-      }
+      }));
+    }
     // We don't need to clear activePipe because the next random trigger will just overwrite it
     // and PipeSystem handles its own list of active animations.
   }, []);

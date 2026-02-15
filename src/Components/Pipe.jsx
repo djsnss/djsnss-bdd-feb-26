@@ -19,23 +19,37 @@ const TOTAL_WIDTH_PER_ITEM = TUBE_WIDTH + GAP;
 const FLOW_DURATION = 2;
 
 const PipeSystem = ({ activeDepartment, onAnimationComplete }) => {
-  const [activePath, setActivePath] = useState(null);
+  const [animations, setAnimations] = useState([]);
 
   useEffect(() => {
     if (!activeDepartment) return;
 
-    const index = DEPARTMENTS.indexOf(activeDepartment);
+    const { dept, isRandom, id } = activeDepartment;
+    const index = DEPARTMENTS.indexOf(dept);
     if (index === -1) return;
 
-    setActivePath(index);
+    // Add new animation
+    const newAnim = { id, index, isRandom };
+    setAnimations((prev) => [...prev, newAnim]);
 
-    const timer = setTimeout(() => {
-      onAnimationComplete && onAnimationComplete();
-      // Wait for drain animation to finish (Total 3s)
-      setTimeout(() => setActivePath(null), 1200); 
-    }, 1800); // Trigger at 60% of 3s (1.8s)
+    // Schedule "hit" callback (1.8s)
+    const hitTimer = setTimeout(() => {
+      onAnimationComplete && onAnimationComplete(activeDepartment);
+    }, 1800);
 
-    return () => clearTimeout(timer);
+    // Schedule cleanup (3s)
+    const cleanupTimer = setTimeout(() => {
+      setAnimations((prev) => prev.filter((a) => a.id !== id));
+    }, 3000);
+
+    return () => {
+      // We generally don't want to cancel ongoing animations if the prop changes
+      // So we might not need cleanup here unless component unmounts.
+      // However, to be safe, we can leave the timers running as they are self-containing.
+      // But if we wanted to be strictly clean on unmount:
+      // clearTimeout(hitTimer);
+      // clearTimeout(cleanupTimer);
+    };
   }, [activeDepartment, onAnimationComplete]);
 
   /* Layout Math */
@@ -48,7 +62,7 @@ const PipeSystem = ({ activeDepartment, onAnimationComplete }) => {
   const endY = 120;
 
   return (
-    <div className="flex flex-col items-center w-full mb-1 px-4">
+    <div className="flex flex-col items-center w-full px-4">
       {/* Responsive SVG */}
       <div className="w-full">
         <svg
@@ -105,7 +119,8 @@ const PipeSystem = ({ activeDepartment, onAnimationComplete }) => {
                 ${pathEndX} ${endY}
             `;
 
-            const isActive = activePath === i;
+            // Check if this pipe has any active animations
+            const activeAnims = animations.filter(a => a.index === i);
 
             return (
               <g key={dept}>
@@ -117,24 +132,25 @@ const PipeSystem = ({ activeDepartment, onAnimationComplete }) => {
                   strokeLinecap="round"
                 />
 
-                {isActive && (
-                  <path
-                    d={pathData}
-                    stroke="url(#bloodGradient)"
-                    strokeWidth="6"
-                    fill="none"
-                    strokeLinecap="round"
-                    filter="url(#bloodGlow)"
-                    className="pipe-flow-active"
-                  />
-                )}
+                {activeAnims.map(anim => (
+                   <path
+                   key={anim.id}
+                   d={pathData}
+                   stroke="url(#bloodGradient)"
+                   strokeWidth="6"
+                   fill="none"
+                   strokeLinecap="round"
+                   filter="url(#bloodGlow)"
+                   className="pipe-flow-active"
+                 />
+                ))}
 
                 <circle
                   cx={slotCenter}
                   cy={endY}
                   r="4"
                   fill={
-                    isActive
+                    activeAnims.length > 0
                       ? "#ef4444"
                       : "rgba(255,255,255,0.5)"
                   }
