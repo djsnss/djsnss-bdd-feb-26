@@ -82,12 +82,12 @@ function App() {
 
       {/* Indian Flag */}
 <div className="absolute left-[-4vw] bottom-[17vh] z-10 pointer-events-none">
-        <img
-          src="/assets/flag_gpt.png"
-          alt="flag"
+  <img
+    src="/assets/flag_gpt.png"
+    alt="flag"
     className="w-[18vw] h-auto object-contain"
-        />
-      </div>
+  />
+</div>
 
 
       {/* Scrollable Main Content Wrapper */}
