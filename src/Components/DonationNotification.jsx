@@ -101,14 +101,14 @@ const DonationNotification = () => {
         top: "1.5vh",
         right: "1vw",
         zIndex: 9999,
-        width: "clamp(200px, 18vw, 320px)",
+        width: "clamp(220px, 20vw, 340px)",
       }}
     >
       {/* Card */}
       <div
         style={{
           position: "relative",
-          borderRadius: "12px",
+          borderRadius: "0.8vw",
           background:
             "linear-gradient(160deg, rgba(255,255,255,0.98) 0%, rgba(250,252,255,0.96) 100%)",
           boxShadow:
@@ -119,7 +119,7 @@ const DonationNotification = () => {
         {/* Accent line */}
         <div
           style={{
-            height: "2.5px",
+            height: "0.2vw",
             background: "linear-gradient(90deg, #e8b4b8, #c0392b, #e8b4b8)",
             opacity: 0.6,
             animation: "smoothBreath 4s ease-in-out infinite",
@@ -127,33 +127,33 @@ const DonationNotification = () => {
         />
 
         {/* Content */}
-        <div style={{ padding: "10px 14px 10px" }}>
+        <div style={{ padding: "0.8vw 1vw" }}>
           {/* Row: Blood group + Name + LIVE */}
           <div
             style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              marginBottom: "8px",
+              marginBottom: "0.6vw",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5vw" }}>
               {/* Blood Group Circle */}
               <div style={{ position: "relative", flexShrink: 0 }}>
                 <div
                   style={{
                     position: "absolute",
-                    inset: "-3px",
-                    borderRadius: "50%",
+                    inset: "-0.2vw",
+                    borderRadius: "0.5vw",
                     border: "2px solid rgba(231,76,60,0.15)",
                     animation: "pulseRing 2s ease-out infinite",
                   }}
                 />
                 <div
                   style={{
-                    width: "36px",
-                    height: "36px",
-                    borderRadius: "50%",
+                    width: "2.5vw",
+                    height: "2.5vw",
+                    borderRadius: "0.5vw",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -163,7 +163,7 @@ const DonationNotification = () => {
                 >
                   <span
                     style={{
-                      fontSize: "12px",
+                      fontSize: "0.85vw",
                       fontWeight: 900,
                       color: "#fff",
                       letterSpacing: "0.02em",
@@ -177,7 +177,7 @@ const DonationNotification = () => {
               {/* Donor Name */}
               <p
                 style={{
-                  fontSize: "23px",
+                  fontSize: "1.5vw",
                   fontWeight: 800,
                   background: "linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)",
                   WebkitBackgroundClip: "text",
@@ -196,8 +196,8 @@ const DonationNotification = () => {
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "4px",
-                padding: "2px 7px 2px 5px",
+                gap: "0.25vw",
+                padding: "0.15vw 0.5vw 0.15vw 0.35vw",
                 borderRadius: "20px",
                 background: "rgba(34,197,94,0.08)",
                 border: "1px solid rgba(34,197,94,0.15)",
@@ -206,8 +206,8 @@ const DonationNotification = () => {
             >
               <div
                 style={{
-                  width: "5px",
-                  height: "5px",
+                  width: "0.35vw",
+                  height: "0.35vw",
                   borderRadius: "50%",
                   background: "#22c55e",
                   boxShadow: "0 0 5px rgba(34,197,94,0.5)",
@@ -216,7 +216,7 @@ const DonationNotification = () => {
               />
               <span
                 style={{
-                  fontSize: "8px",
+                  fontSize: "0.55vw",
                   fontWeight: 800,
                   color: "#16a34a",
                   letterSpacing: "0.05em",
@@ -228,13 +228,13 @@ const DonationNotification = () => {
           </div>
 
           {/* Department */}
-          <div style={{ textAlign: "center", marginBottom: "6px" }}>
+          <div style={{ textAlign: "center", marginBottom: "0.4vw" }}>
             <span
               style={{
                 display: "inline-block",
-                padding: "2px 10px",
-                borderRadius: "10px",
-                fontSize: "10px",
+                padding: "0.15vw 0.7vw",
+                borderRadius: "0.7vw",
+                fontSize: "0.7vw",
                 fontWeight: 600,
                 color: "#6b7280",
                 background: "rgba(0,0,0,0.04)",
@@ -248,8 +248,8 @@ const DonationNotification = () => {
           {/* Thank you */}
           <div
             style={{
-              padding: "4px 8px",
-              borderRadius: "8px",
+              padding: "0.3vw 0.6vw",
+              borderRadius: "0.5vw",
               background:
                 "linear-gradient(135deg, rgba(255,153,51,0.06) 0%, rgba(255,255,255,0.04) 50%, rgba(19,136,8,0.06) 100%)",
               border: "1px solid rgba(0,0,0,0.03)",
@@ -259,7 +259,7 @@ const DonationNotification = () => {
             <p
               style={{
                 margin: 0,
-                fontSize: "9px",
+                fontSize: "0.8vw",
                 fontWeight: 600,
                 color: "#9ca3af",
               }}
