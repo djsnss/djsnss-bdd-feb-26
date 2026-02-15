@@ -40,10 +40,25 @@ function App() {
         
         // Ensure data matches our DEPARTMENTS keys
         const formattedCounts = {};
+        
+        // Normalize API keys to uppercase for case-insensitive matching if needed
+        const apiDataNormalized = {};
+        Object.keys(data).forEach(key => {
+          apiDataNormalized[key.toUpperCase()] = data[key];
+        });
+
         DEPARTMENTS.forEach(dept => {
           // Map "OTHER" in frontend to "Outsider" in API
-          const apiKey = dept === "OTHER" ? "Outsider" : dept;
-          formattedCounts[dept] = data[apiKey] || 0;
+          let apiKey = dept === "OTHER" ? "Outsider" : dept;
+          
+          // Try exact match first, then uppercase match
+          let count = data[apiKey];
+          
+          if (count === undefined) {
+             count = apiDataNormalized[apiKey.toUpperCase()];
+          }
+          
+          formattedCounts[dept] = count || 0;
         });
         
         setTubeCounts(formattedCounts);
