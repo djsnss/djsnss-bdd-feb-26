@@ -11,13 +11,13 @@ import HeadingBox from "./Components/HeadingBox";
 const DEPARTMENTS = [
   "AIDS",
   "AIML",
-  "COMPS",
+  "Comps",
   "CSEDS",
   "EXTC",
   "ICB",
   "IT",
   "MECH",
-  "Outsider",
+  "OTHER",
 ];
 
 function App() {
@@ -25,9 +25,11 @@ function App() {
     DEPARTMENTS.reduce((acc, dept) => ({ ...acc, [dept]: 0 }), {})
   );
 
+  // activePipe is now an object: { dept, isRandom, id }
   const [activePipe, setActivePipe] = useState(null);
 
-  const [isRandomFlow, setIsRandomFlow] = useState(false);
+  // We don't need isRandomFlow state anymore as it's part of the trigger object
+  // const [isRandomFlow, setIsRandomFlow] = useState(false);
 
   // Fetch initial counts
   useEffect(() => {
@@ -39,7 +41,9 @@ function App() {
         // Ensure data matches our DEPARTMENTS keys
         const formattedCounts = {};
         DEPARTMENTS.forEach(dept => {
-          formattedCounts[dept] = data[dept] || 0;
+          // Map "OTHER" in frontend to "Outsider" in API
+          const apiKey = dept === "OTHER" ? "Outsider" : dept;
+          formattedCounts[dept] = data[apiKey] || 0;
         });
         
         setTubeCounts(formattedCounts);
@@ -56,10 +60,20 @@ function App() {
 
   useEffect(() => {
     const handleDonationDismissed = (event) => {
-      const { department } = event.detail;
+      let { department } = event.detail;
+      
+      // Map incoming "Outsider" event to "OTHER"
+      if (department === "Outsider") {
+        department = "OTHER";
+      }
+
       if (DEPARTMENTS.includes(department)) {
-        setIsRandomFlow(false); // It's a real donation
-        setActivePipe(department);
+         // Trigger real donation flow
+         setActivePipe({
+           dept: department,
+           isRandom: false,
+           id: Date.now() + Math.random() // Ensure unique ID
+         });
       }
     };
 
@@ -73,31 +87,34 @@ function App() {
 
   // Random flow effect
   useEffect(() => {
-    if (!activePipe) {
-      const delay = Math.random() * 2000 + 1000; // 1-3 seconds delay
+    // Continuous random flow
+    const delay = Math.random() * 1000 + 500; // 0.5s - 1.5s delay (Continuous)
+    
       const timeout = setTimeout(() => {
         const randomDept = DEPARTMENTS[Math.floor(Math.random() * DEPARTMENTS.length)];
-        setIsRandomFlow(true); // Mark as random
-        setActivePipe(randomDept);
+      
+      // Trigger random flow
+      setActivePipe({
+        dept: randomDept,
+        isRandom: true,
+        id: Date.now() + Math.random()
+      });
+      
       }, delay);
       
       return () => clearTimeout(timeout);
-    }
-  }, [activePipe]);
+  }, [activePipe]); // Re-run whenever activePipe changes (which acts as our loop)
 
-  const handleAnimationComplete = useCallback(() => {
-    if (activePipe) {
-      // Only increment if it's NOT a random flow
-      if (!isRandomFlow) {
+  const handleAnimationComplete = useCallback((completedAnim) => {
+    if (completedAnim && !completedAnim.isRandom) {
         setTubeCounts((prev) => ({
           ...prev,
-          [activePipe]: prev[activePipe] + 1,
+        [completedAnim.dept]: prev[completedAnim.dept] + 1,
         }));
       }
-      setActivePipe(null);
-      setIsRandomFlow(false); // Reset flag
-    }
-  }, [activePipe, isRandomFlow]);
+    // We don't need to clear activePipe because the next random trigger will just overwrite it
+    // and PipeSystem handles its own list of active animations.
+  }, []);
 
   return (
     <div className="app-container relative w-full min-h-screen overflow-hidden flex flex-col items-center">
@@ -178,7 +195,7 @@ function App() {
 
               {/* Tubes */}
               <div
-                className="flex items-end w-full justify-between"
+                className="flex items-end w-full justify-between -mt-1"
               >
                 {DEPARTMENTS.map((dept) => (
                   <Tube
