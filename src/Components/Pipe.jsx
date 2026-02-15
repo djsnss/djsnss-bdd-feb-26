@@ -21,8 +21,6 @@ const FLOW_DURATION = 2;
 const PipeSystem = ({ activeDepartment, onAnimationComplete }) => {
   const [activePath, setActivePath] = useState(null);
 
-  /* ───────────── Pipe Activation ───────────── */
-
   useEffect(() => {
     if (!activeDepartment) return;
 
@@ -39,26 +37,23 @@ const PipeSystem = ({ activeDepartment, onAnimationComplete }) => {
     return () => clearTimeout(timer);
   }, [activeDepartment, onAnimationComplete]);
 
-  /* ───────────── Layout Calculations ───────────── */
-
+  /* Layout Math */
   const totalWidth =
     DEPARTMENTS.length * TUBE_WIDTH +
     (DEPARTMENTS.length - 1) * GAP;
 
   const centerX = totalWidth / 2;
-  const junctionY = 18;
-  const endY = 95;
+  const junctionY = 0;
+  const endY = 120;
 
   return (
-    <div className="flex flex-col items-center w-full mb-1">
-
-      {/* ───────── Pipe SVG System ───────── */}
-      <div className="relative" style={{ width: totalWidth, height: endY }}>
+    <div className="flex flex-col items-center w-full mb-1 px-4">
+      {/* Responsive SVG */}
+      <div className="w-full">
         <svg
-          width="100%"
-          height="100%"
           viewBox={`0 0 ${totalWidth} ${endY}`}
-          className="overflow-visible"
+          preserveAspectRatio="xMidYMin meet"
+          className="w-full h-auto"
         >
           <defs>
             <linearGradient id="pipeStroke" x1="0" y1="0" x2="1" y2="0">
@@ -82,17 +77,6 @@ const PipeSystem = ({ activeDepartment, onAnimationComplete }) => {
             </filter>
           </defs>
 
-          {/* Main Vertical Stem */}
-          <line
-            x1={centerX}
-            y1={0}
-            x2={centerX}
-            y2={junctionY}
-            stroke="url(#pipeStroke)"
-            strokeWidth="8"
-            strokeLinecap="round"
-          />
-
           {/* Junction */}
           <circle
             cx={centerX}
@@ -103,14 +87,18 @@ const PipeSystem = ({ activeDepartment, onAnimationComplete }) => {
 
           {/* Branches */}
           {DEPARTMENTS.map((dept, i) => {
-            const slotCenter = i * TOTAL_WIDTH_PER_ITEM + TUBE_WIDTH / 2;
+            const slotCenter =
+              i * TOTAL_WIDTH_PER_ITEM + TUBE_WIDTH / 2;
+
             const midY = junctionY + (endY - junctionY) * 0.4;
+
             const pathData = `
               M ${centerX} ${junctionY}
               C ${centerX} ${midY},
                 ${slotCenter} ${midY},
                 ${slotCenter} ${endY}
             `;
+
             const isActive = activePath === i;
 
             return (
@@ -139,7 +127,11 @@ const PipeSystem = ({ activeDepartment, onAnimationComplete }) => {
                   cx={slotCenter}
                   cy={endY}
                   r="4"
-                  fill={isActive ? "#ef4444" : "rgba(255,255,255,0.5)"}
+                  fill={
+                    isActive
+                      ? "#ef4444"
+                      : "rgba(255,255,255,0.5)"
+                  }
                 />
               </g>
             );
@@ -147,7 +139,7 @@ const PipeSystem = ({ activeDepartment, onAnimationComplete }) => {
         </svg>
       </div>
 
-      {/* ───────── Animations ───────── */}
+      {/* Animation */}
       <style>{`
         .pipe-flow-active {
           stroke-dasharray: 500;

@@ -22,8 +22,9 @@ const DEPARTMENTS = [
 
 function App() {
   const [tubeCounts, setTubeCounts] = useState(
-    DEPARTMENTS.reduce((acc, dept) => ({ ...acc, [dept]: 0 }), {}),
+    DEPARTMENTS.reduce((acc, dept) => ({ ...acc, [dept]: 0 }), {})
   );
+
   const [activePipe, setActivePipe] = useState(null);
 
   useEffect(() => {
@@ -36,7 +37,10 @@ function App() {
 
     window.addEventListener("donation-dismissed", handleDonationDismissed);
     return () =>
-      window.removeEventListener("donation-dismissed", handleDonationDismissed);
+      window.removeEventListener(
+        "donation-dismissed",
+        handleDonationDismissed
+      );
   }, []);
 
   const handleAnimationComplete = useCallback(() => {
@@ -50,15 +54,17 @@ function App() {
   }, [activePipe]);
 
   return (
-    <div className="app-container relative w-full h-screen overflow-hidden">
-      {/* Background animations */}
-      <BulletAnimation />
-      <FighterJetAnimation />
-      <BombAnimation />
+    <div className="app-container relative w-full min-h-screen overflow-hidden flex flex-col items-center">
+      {/* Background Animations */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <BulletAnimation />
+        <FighterJetAnimation />
+        <BombAnimation />
+      </div>
 
       {/* Logo */}
       <div
-        className="absolute top-4 left-4 z-50 rounded-full flex items-center justify-center"
+        className="absolute top-4 left-4 z-50 rounded-full flex items-center justify-center pointer-events-auto"
         style={{
           width: 75,
           height: 75,
@@ -73,71 +79,76 @@ function App() {
           className="w-14 h-14 object-contain rounded-full"
         />
       </div>
-      
-{/* Indian Flag */}
-<div
-  className="
-    absolute
-    left-[-70px]     
-    top-[220px]      
-    z-50             
-    pointer-events-none
-  "
->
-  <img
-    src="/assets/flag_gpt.png"
-    alt="flag"
-    className="w-[338px] h-auto object-contain"
-  />
-</div>
 
+      {/* Indian Flag */}
+      <div className="absolute left-[-70px] top-[220px] z-0 pointer-events-none opacity-80">
+        <img
+          src="/assets/flag_gpt.png"
+          alt="flag"
+          className="w-[338px] h-auto object-contain"
+        />
+      </div>
 
-      {/* ───────── HEADER ───────── */}
-<HeadingBox text="BLOOD DONATION DRIVE 2026" />
+      {/* Scrollable Main Content Wrapper */}
+      <div className="relative z-10 w-full flex-grow flex flex-col items-center overflow-auto pt-8 pb-12">
+        {/* Header */}
+        <div className="mb-0 w-full flex justify-center px-4 z-20 -mb-4">
+          <HeadingBox text="BLOOD DONATION DRIVE 2026" />
+        </div>
 
-      {/* Transparent Glass Container */}
-      <div className="absolute inset-0 z-20 flex items-center justify-center">
-        <div
-          className="rounded-3xl overflow-x-auto"
-          style={{
-            background: "rgba(0, 0, 0, 0.25)",
-            backdropFilter: "blur(6px)",
-            border: "1px solid rgba(255, 255, 255, 0.1)",
-            boxShadow:
-              "0 8px 40px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)",
-            padding: "28px 48px 32px",
-            marginTop: "90px",
-          }}
-        >
-          <div className="flex flex-col items-center min-w-max">
-            <PipeSystem
-              activeDepartment={activePipe}
-              onAnimationComplete={handleAnimationComplete}
-            />
-
+        {/* Glass Container - Shared Layout */}
+        <div className="w-full flex justify-center px-4">
+          <div
+            className="
+              relative
+              rounded-3xl
+              bg-black/25
+              backdrop-blur-md
+              border border-white/10
+              shadow-[0_8px_40px_rgba(0,0,0,0.2),_inset_0_1px_0_rgba(255,255,255,0.08)]
+              pt-0
+              pb-6
+              px-6
+              overflow-x-auto
+              max-w-full
+            "
+          >
             <div
-              className="flex items-end mt-[-8px]"
+              className="flex flex-col items-center"
               style={{
                 width:
                   DEPARTMENTS.length * TUBE_WIDTH +
                   (DEPARTMENTS.length - 1) * GAP,
-                justifyContent: "space-between",
+                minWidth:
+                  DEPARTMENTS.length * TUBE_WIDTH +
+                  (DEPARTMENTS.length - 1) * GAP,
               }}
             >
-              {DEPARTMENTS.map((dept) => (
-                <Tube
-                  key={dept}
-                  count={tubeCounts[dept]}
-                  color="red"
-                  label={dept}
-                />
-              ))}
+              {/* Pipes */}
+              <PipeSystem
+                activeDepartment={activePipe}
+                onAnimationComplete={handleAnimationComplete}
+              />
+
+              {/* Tubes */}
+              <div
+                className="flex items-end mt-2 w-full justify-between"
+              >
+                {DEPARTMENTS.map((dept) => (
+                  <Tube
+                    key={dept}
+                    count={tubeCounts[dept]}
+                    color="red"
+                    label={dept}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Right-side Donation Notifications */}
+      {/* Donation Notifications */}
       <DonationNotification />
     </div>
   );

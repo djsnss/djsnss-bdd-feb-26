@@ -13,7 +13,8 @@ const Tube = ({ count = 0, color = "#dc2626", label = "COMPS" }) => {
           background: "rgba(255,255,255,0.12)",
           border: "2px solid rgba(255,255,255,0.25)",
           backdropFilter: "blur(8px)",
-          boxShadow: "inset 0 2px 10px rgba(0,0,0,0.15), 0 4px 20px rgba(0,0,0,0.1)",
+          boxShadow:
+            "inset 0 2px 10px rgba(0,0,0,0.15), 0 4px 20px rgba(0,0,0,0.1)",
         }}
       >
         {/* Top cap */}
@@ -56,26 +57,10 @@ const Tube = ({ count = 0, color = "#dc2626", label = "COMPS" }) => {
           </div>
         </div>
 
-        {/* Bubbles */}
-        <div className="absolute bottom-0 w-full h-full pointer-events-none">
-          {[...Array(5)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-[10px] h-[10px] rounded-[50%_50%_0_50%] opacity-80 animate-bubble"
-              style={{
-                background: "var(--tube-color)",
-                left: `${30 + i * 5}%`,
-                bottom: "calc(var(--tube-percentage) / 3)",
-                animationDelay: `${i * 0.15}s`,
-              }}
-            />
-          ))}
-        </div>
-
         {/* Count badge — circle */}
         <div className="absolute inset-0 flex items-center justify-center z-40">
           <div
-            className="w-9 h-9 rounded-full flex items-center justify-center"
+            className="w-[60px] h-[60px] rounded-full flex items-center justify-center"
             style={{
               background: "rgba(255,255,255,0.85)",
               boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
@@ -84,7 +69,7 @@ const Tube = ({ count = 0, color = "#dc2626", label = "COMPS" }) => {
             }}
           >
             <span
-              className="text-base font-extrabold"
+              className="text-xl font-extrabold"
               style={{ color: count > 0 ? "#dc2626" : "#6b7280" }}
             >
               {count}
@@ -116,25 +101,7 @@ const Tube = ({ count = 0, color = "#dc2626", label = "COMPS" }) => {
           100% { transform: translateX(-50%) rotate(360deg); }
         }
 
-        @keyframes bubble {
-          0% {
-            transform: scale(0.3) rotate(50deg);
-            bottom: calc(var(--tube-percentage) / 3);
-            opacity: 0.8;
-          }
-          50% {
-            transform: scale(0.8) rotate(50deg);
-          }
-          100% {
-            bottom: 130%;
-            opacity: 0;
-            transform: scale(1) rotate(50deg);
-          }
-        }
 
-        .animate-liquid {
-          animation: liquid 4s infinite linear;
-        }
 
         .animate-liquid-reverse {
           animation: liquid 4s infinite linear reverse;

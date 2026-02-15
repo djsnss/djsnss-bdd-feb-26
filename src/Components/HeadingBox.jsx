@@ -2,7 +2,7 @@ import React from "react";
 
 const HeadingBox = ({ text }) => {
   return (
-    <div className="flex justify-center w-full mt-6">
+    <div className="flex justify-center w-full">
 
       {/* Military Border */}
       <div
