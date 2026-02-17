@@ -6,6 +6,8 @@ dotenv.config();
 
 const SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"];
 
+let lastSentIndex = 0;
+
 // Debug environment variables
 console.log("Environment variables check:");
 console.log(
@@ -108,8 +110,8 @@ export async function fetchCategoryCounts() {
   }
 }
 
-export async function getLatestDonors(){
-  try{
+export async function getLatestDonors() {
+  try {
     console.log("Attempting to fetch data for latest donors...");
 
     const response = await sheets.spreadsheets.values.get({
@@ -119,44 +121,76 @@ export async function getLatestDonors(){
     console.log("Successfully fetched data for latest donors");
 
     const rows = response.data.values || [];
-      const headers = rows.shift();
+    const headers = rows.shift();
     console.log("Headers found:", headers);
     console.log(rows.length, "data rows found");
     console.log(rows.slice(0, 5)); // Log first 5 rows for debugging
 
-  const nameIdx = headers.indexOf("Full Name");
-  const statusIdx = headers.indexOf("Donated ");
-  const timeIdx = headers.indexOf("Timestamp");
-  const bloodGroupIdx = headers.indexOf("Blood Group");
-  const departmentIdx = headers.indexOf("Department");
+    const nameIdx = headers.indexOf("Full Name");
+    const statusIdx = headers.indexOf("Donated");
+    const timeIdx = headers.indexOf("Timestamp");
+    const bloodGroupIdx = headers.indexOf("Blood Group");
+    const departmentIdx = headers.indexOf("Department");
 
-  console.log(rows[0][timeIdx])
-  console.log(new Date(rows[0][timeIdx]))
+    console.log(rows[0][timeIdx])
+    console.log(new Date(rows[0][timeIdx]))
+
+    const parseDate = (dateStr) => {
+
+      if (!dateStr) return 0;
+
+      const [datePart, timePart] = dateStr.split(" ");
+
+      if (!datePart || !timePart) return 0;
+
+      const [day, month, year] = datePart.split("/");
+
+      // MANUALLY BUILD DATE
+      return new Date(
+        Number(year),
+        Number(month) - 1,
+        Number(day),
+        ...timePart.split(":").map(Number)
+      ).getTime();
+    };
 
 
-  const donors = rows
-    .filter(r => r[statusIdx] === "Donated")
-    .sort((a, b) => {
-      const parseDate = (dateStr) => {
-        if (!dateStr) return 0;
-        const [datePart,timePart] = dateStr.split(" ");
-        const [day, month, year] = datePart.split("/");
-        return new Date(`${year}-${month}-${day}T${timePart}`);
-      };
-      return parseDate(b[timeIdx]) - parseDate(a[timeIdx]);
-    })
-    .slice(0, 1)
-    .map(r => ({
-      name:r[nameIdx],
-      bloodGroup: r[bloodGroupIdx],
-      department: r[departmentIdx]
-    }));
-    console.log("Latest donors:", donors);
-    return donors;
 
-  }catch(err){
+    const donors = rows
+      .filter(r => r[statusIdx] === "Donated")
+      .sort((a, b) => parseDate(a[timeIdx]) - parseDate(b[timeIdx])
+      )
+      .map(r => ({
+        name: r[nameIdx],
+        bloodGroup: r[bloodGroupIdx],
+        department: r[departmentIdx]
+      }));
+
+    let latest_donors = [];
+    console.log("Latest 10 donors:", donors.slice(0, 10));
+    console.log("Last sent index:", lastSentIndex);
+    console.log("Total donors:", donors.length);
+    if (donors.length >= lastSentIndex + 5) {
+      latest_donors = donors.slice(lastSentIndex, lastSentIndex + 5);
+      lastSentIndex += 5;
+    } else {
+      if (lastSentIndex !== 0) {
+        latest_donors = donors.slice(lastSentIndex - 5, lastSentIndex);
+      } else {
+        latest_donors = [];
+      }
+    }
+
+    return latest_donors;
+
+  } catch (err) {
     console.error("Error fetching latest donors:", err.message);
     console.error("Full error:", err);
     throw err;
   }
+}
+
+export async function setIndexto(x=0) {
+  lastSentIndex = x;
+  console.log("Index reset to ",x);
 }

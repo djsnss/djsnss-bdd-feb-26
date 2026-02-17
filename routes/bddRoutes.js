@@ -1,5 +1,5 @@
 import express from "express";
-import { fetchCategoryCounts,getLatestDonors } from "../controller/bddController.js";
+import { fetchCategoryCounts,getLatestDonors,setIndexto } from "../controller/bddController.js";
 
 const router = express.Router();
 
@@ -26,6 +26,18 @@ router.get("/latest-donors", async (req, res) => {
       details: error.message,
     });
   }
+});
+
+router.get("/set-index/:idx", (req, res) => {
+  const index = Number(req.params.idx);
+  if (isNaN(index)) {
+    return res.status(400).json({ error: "Index must be a number" });
+  }
+  if(index%5 !== 0){
+    return res.status(400).json({ error: "Index must be a multiple of 5" });
+  }
+  setIndexto(index);
+  res.json({ message: `Index set to ${index}` });
 });
 
 export default router;
