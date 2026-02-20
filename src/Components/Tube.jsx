@@ -1,8 +1,8 @@
 import React from "react";
 
 const Tube = ({ count = 0, color = "#dc2626", label = "COMPS" }) => {
-  const percentage = Math.min(count * 8, 100);
-
+const MAX_LIMIT = 150;
+const percentage = Math.min(parseInt((count / MAX_LIMIT) * 100), 100);
   return (
     <div className="flex flex-col items-center">
       <div
